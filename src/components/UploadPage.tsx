@@ -4,10 +4,8 @@ import { fetchSampleFilesFromSupabase, fetchSampleDataFromSupabase } from '../ut
 import { trackFileUpload, trackSampleSelection, trackAnalysisComplete, trackClick } from '../utils/analytics';
 import QueueStatus from './QueueStatus';
 
-// 🛑 STEP 1: PASTE YOUR NGROK URL HERE
-// Leave empty to use mock data for testing
-// Set to "" to test UI without backend, or paste your active ngrok URL
-const API_URL: string = "https://unexcited-nondepreciatively-justice.ngrok-free.dev"; // Kaggle Backend with AI Model + Analytics + Queue
+// Backend API URL - leave empty to use mock data for testing
+const API_URL: string = "https://unexcited-nondepreciatively-justice.ngrok-free.dev";
 
 interface UploadPageProps {
   isDarkMode: boolean;
@@ -190,18 +188,18 @@ export default function UploadPage({ isDarkMode, onNavigate }: UploadPageProps) 
     });
   };
 
-  // --- 📊 SAMPLE FILES FUNCTIONS ---
+  // Sample files functions
   const fetchSampleFiles = async () => {
     setLoadingSamples(true);
     
     try {
       // Try to fetch real data from Supabase first
-      console.log("🔍 Attempting to fetch real sample files from database...");
+      console.log("Attempting to fetch real sample files from database...");
       const realSamples = await fetchSampleFilesFromSupabase();
-      console.log("✅ Loaded real sample files from database:", realSamples.length);
+      console.log("Loaded real sample files from database:", realSamples.length);
       setSampleFiles(realSamples);
     } catch (error) {
-      console.warn("⚠️ Failed to fetch from database, using fallback mock data:", error);
+      console.warn("Failed to fetch from database, using fallback mock data:", error);
       
       // Fallback to mock data if database is empty or connection fails
       const mockSamples = [
@@ -254,7 +252,7 @@ export default function UploadPage({ isDarkMode, onNavigate }: UploadPageProps) 
       ];
       
       setSampleFiles(mockSamples);
-      console.log("✅ Using fallback mock data:", mockSamples.length, "samples");
+      console.log("Using fallback mock data:", mockSamples.length, "samples");
     } finally {
       setLoadingSamples(false);
     }
@@ -262,7 +260,7 @@ export default function UploadPage({ isDarkMode, onNavigate }: UploadPageProps) 
 
   const handleSampleSelect = async (jobId: string) => {
     try {
-      console.log("🔍 Loading sample data for job:", jobId);
+      console.log("Loading sample data for job:", jobId);
       
       // Track sample selection
       const sampleFile = sampleFiles.find(f => f.job_id === jobId);
@@ -271,12 +269,12 @@ export default function UploadPage({ isDarkMode, onNavigate }: UploadPageProps) 
       
       // Try to fetch real data from Supabase first
       const realData = await fetchSampleDataFromSupabase(jobId);
-      console.log("✅ Loaded real sample data from database");
+      console.log("Loaded real sample data from database");
       
       localStorage.setItem('analysisResults', JSON.stringify(realData));
       onNavigate('output');
     } catch (error) {
-      console.warn("⚠️ Failed to fetch real data, using fallback mock data:", error);
+      console.warn("Failed to fetch real data, using fallback mock data:", error);
       
       // Generate varied mock data based on jobId as fallback
       const sampleFile = sampleFiles.find(f => f.job_id === jobId);
@@ -340,7 +338,7 @@ export default function UploadPage({ isDarkMode, onNavigate }: UploadPageProps) 
       };
 
       localStorage.setItem('analysisResults', JSON.stringify(mockSampleData));
-      console.log("✅ Using fallback mock data for:", filename);
+      console.log("Using fallback mock data for:", filename);
       onNavigate('output');
     }
   };
@@ -388,7 +386,7 @@ export default function UploadPage({ isDarkMode, onNavigate }: UploadPageProps) 
     try {
       // If no API URL is set, use mock data for testing
       if (!API_URL || (typeof API_URL === 'string' && API_URL.trim() === "")) {
-        console.log("⚠️ No API URL configured - Using mock data");
+        console.log("No API URL configured - Using mock data");
         
         // Simulate processing time
         await new Promise(resolve => setTimeout(resolve, 3000));
@@ -430,7 +428,7 @@ export default function UploadPage({ isDarkMode, onNavigate }: UploadPageProps) 
 
         // Save mock data
         localStorage.setItem('analysisResults', JSON.stringify(mockData));
-        console.log("💾 Saved mock data to localStorage");
+        console.log("Saved mock data to localStorage");
 
         // Track analysis completion
         trackAnalysisComplete("2.8s", 150);
@@ -451,13 +449,13 @@ export default function UploadPage({ isDarkMode, onNavigate }: UploadPageProps) 
           Object.values(metadata.environmental).some(v => v) || 
           metadata.notes) {
         formData.append("metadata", JSON.stringify(metadata));
-        console.log("📋 Including metadata:", metadata);
+        console.log("Including metadata:", metadata);
       }
       
-      console.log("🚀 Sending to Backend...");
-      console.log("📁 File:", uploadedFiles[0].name);
-      console.log("🔗 API URL:", API_URL);
-      console.log("👤 Session ID:", sessionId);
+      console.log("Sending to Backend...");
+      console.log("File:", uploadedFiles[0].name);
+      console.log("API URL:", API_URL);
+      console.log("Session ID:", sessionId);
 
       const response = await fetch(`${API_URL}/analyze`, {
         method: 'POST',
@@ -467,19 +465,19 @@ export default function UploadPage({ isDarkMode, onNavigate }: UploadPageProps) 
         },
       });
 
-      console.log("📡 Response Status:", response.status);
+      console.log("Response Status:", response.status);
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error("❌ Server Error Response:", errorText);
+        console.error("Server Error Response:", errorText);
         throw new Error(`HTTP ${response.status}: ${errorText}`);
       }
 
       const result = await response.json();
-      console.log("📦 Received Result:", result);
+      console.log("Received Result:", result);
 
       if (result.status === "success") {
-        console.log("✅ Analysis Complete!");
+        console.log("Analysis Complete!");
         
         // Complete the progress bar
         setProgress(100);
@@ -487,7 +485,7 @@ export default function UploadPage({ isDarkMode, onNavigate }: UploadPageProps) 
 
         // Save data to localStorage
         localStorage.setItem('analysisResults', JSON.stringify(result.data));
-        console.log("💾 Saved to localStorage");
+        console.log("Saved to localStorage");
 
         // Track analysis completion
         const totalSeqs = result.data?.metadata?.totalSequences || 0;
@@ -497,28 +495,28 @@ export default function UploadPage({ isDarkMode, onNavigate }: UploadPageProps) 
         // Navigate to results
         onNavigate('output');
       } else if (result.status === "queued") {
-        console.log("📋 Added to queue:", result.message);
+        console.log("Added to queue:", result.message);
         setIsLoading(false);
         setProgress(0);
         setLoadingStage(0);
         
         // Show queue status instead of loading
-        alert(`📋 ${result.message}\n\nYour file has been added to the processing queue. You can see the queue status below.`);
+        alert(`${result.message}\n\nYour file has been added to the processing queue. You can see the queue status below.`);
         return;
       } else if (result.status === "processing") {
-        console.log("🔄 Already processing:", result.message);
+        console.log("Already processing:", result.message);
         setIsLoading(false);
         setProgress(0);
         setLoadingStage(0);
         
-        alert(`🔄 ${result.message}\n\nYour file is currently being processed. Please wait...`);
+        alert(`${result.message}\n\nYour file is currently being processed. Please wait...`);
         return;
       } else {
-        console.error("❌ Server returned error:", result.message);
+        console.error("Server returned error:", result.message);
         throw new Error("Server Error: " + (result.message || "Unknown error"));
       }
     } catch (error) {
-      console.error("❌ Connection Failed:", error);
+      console.error("Connection Failed:", error);
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
       
       setIsLoading(false);

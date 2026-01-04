@@ -9,7 +9,7 @@ SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 
 def test_connection():
     """Test connection to Supabase"""
-    print("🧪 Testing Supabase connection...")
+    print("Testing Supabase connection...")
     
     try:
         from supabase import create_client
@@ -23,14 +23,14 @@ def test_connection():
         
         # Try to query tables
         response = client.table('analysis_jobs').select('*').limit(1).execute()
-        print("✅ Connection successful!")
-        print(f"📊 Found {len(response.data)} records in analysis_jobs table")
+        print("Connection successful!")
+        print(f"Found {len(response.data)} records in analysis_jobs table")
         
         return True
         
     except Exception as e:
-        print(f"❌ Connection failed: {e}")
-        print("\n🔧 Setup steps:")
+        print(f"Connection failed: {e}")
+        print("\nSetup steps:")
         print("1. Get your anon key from Supabase dashboard > Settings > API")
         print("2. Replace YOUR_ANON_KEY_HERE in this file")
         print("3. Run the SQL migration in Supabase SQL Editor")

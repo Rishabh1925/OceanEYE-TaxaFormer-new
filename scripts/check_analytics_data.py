@@ -11,12 +11,12 @@ SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 def main():
     supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-    print('📊 Analytics Data Summary:')
+    print('Analytics Data Summary:')
     print('=' * 50)
 
     # Check user sessions
     sessions = supabase.table('user_sessions').select('*').execute()
-    print(f'👥 Total Sessions: {len(sessions.data)}')
+    print(f'Total Sessions: {len(sessions.data)}')
     if sessions.data:
         latest_session = sessions.data[-1]
         session_id = latest_session['session_id'][:8]
@@ -29,7 +29,7 @@ def main():
 
     # Check page views
     page_views = supabase.table('page_views').select('*').execute()
-    print(f'📄 Total Page Views: {len(page_views.data)}')
+    print(f'Total Page Views: {len(page_views.data)}')
     if page_views.data:
         print('   Recent page views:')
         for pv in page_views.data[-3:]:
@@ -39,17 +39,17 @@ def main():
 
     # Check interactions
     interactions = supabase.table('user_interactions').select('*').execute()
-    print(f'🖱️ Total Interactions: {len(interactions.data)}')
+    print(f'Total Interactions: {len(interactions.data)}')
     if interactions.data:
         print('   Recent interactions:')
         for interaction in interactions.data[-3:]:
             print(f'   - {interaction["interaction_type"]}: {interaction["element_text"]}')
 
     print()
-    print('✅ Analytics system is collecting data successfully!')
+    print('Analytics system is collecting data successfully!')
     
     # Show detailed breakdown
-    print('\n📈 Detailed Analytics:')
+    print('\nDetailed Analytics:')
     print('-' * 30)
     
     # Page view breakdown

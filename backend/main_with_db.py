@@ -21,10 +21,10 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 try:
     from db.supabase_db import TaxaformerDB
     db = TaxaformerDB()
-    print("✅ Supabase database connected")
+    print("[OK] Supabase database connected")
 except Exception as e:
-    print(f"⚠️ Database not available: {e}")
-    print("⚠️ Backend will work without database (no data persistence)")
+    print(f"[WARN] Database not available: {e}")
+    print("[WARN] Backend will work without database (no data persistence)")
     db = None
 
 # Initialize FastAPI app
@@ -86,9 +86,9 @@ async def analyze_endpoint(
         if metadata:
             try:
                 parsed_metadata = json.loads(metadata)
-                print(f"📋 Received metadata: {parsed_metadata}")
+                print(f"[INFO] Received metadata: {parsed_metadata}")
             except json.JSONDecodeError as e:
-                print(f"⚠️ Warning: Could not parse metadata: {e}")
+                print(f"[WARN] Warning: Could not parse metadata: {e}")
         
         # Validate file
         if not file.filename:
@@ -138,9 +138,9 @@ async def analyze_endpoint(
                     metadata=parsed_metadata,
                     analysis_result=result_data
                 )
-                print(f"💾 Saved to database with job_id: {job_id}")
+                print(f"[OK] Saved to database with job_id: {job_id}")
             except Exception as db_error:
-                print(f"⚠️ Database save failed: {db_error}")
+                print(f"[WARN] Database save failed: {db_error}")
                 # Continue without database - analysis still succeeds
         
         # Return response
@@ -320,28 +320,28 @@ def start_server(port: int = 8000, use_ngrok: bool = True, ngrok_token: str = No
         try:
             public_url = ngrok.connect(port).public_url
             print("\n" + "="*60)
-            print("🚀 TAXAFORMER API STARTED")
+            print("TAXAFORMER API STARTED")
             print("="*60)
-            print(f"📡 PUBLIC URL: {public_url}")
-            print(f"🔧 LOCAL URL:  http://localhost:{port}")
-            print(f"💾 DATABASE:   {'Connected' if db else 'Disabled'}")
+            print(f"PUBLIC URL: {public_url}")
+            print(f"LOCAL URL:  http://localhost:{port}")
+            print(f"DATABASE:   {'Connected' if db else 'Disabled'}")
             print("="*60)
-            print("\n⚡ Copy the PUBLIC URL to your frontend configuration!")
+            print("\nCopy the PUBLIC URL to your frontend configuration!")
             print(f"   Update API_URL in your frontend to: {public_url}")
-            print("\n📝 Example fetch usage:")
+            print("\nExample fetch usage:")
             print(f'   fetch("{public_url}/analyze", {{ method: "POST", body: formData }})')
             print("\n" + "="*60 + "\n")
         except Exception as e:
-            print(f"\n❌ Failed to create ngrok tunnel: {e}")
-            print("\n💡 Try these solutions:")
+            print(f"\n[ERROR] Failed to create ngrok tunnel: {e}")
+            print("\nTry these solutions:")
             print("1. Check if ngrok is already running elsewhere")
             print("2. Get a new auth token from: https://dashboard.ngrok.com/")
             print("3. Run without ngrok: Set USE_NGROK = False in main.py")
             raise
     else:
-        print(f"\n🚀 Server starting on http://localhost:{port}")
-        print(f"💾 DATABASE: {'Connected' if db else 'Disabled'}")
-        print("⚠️  No ngrok tunnel - local access only\n")
+        print(f"\nServer starting on http://localhost:{port}")
+        print(f"DATABASE: {'Connected' if db else 'Disabled'}")
+        print("No ngrok tunnel - local access only\n")
     
     # Run server
     uvicorn.run(app, host="0.0.0.0", port=port)

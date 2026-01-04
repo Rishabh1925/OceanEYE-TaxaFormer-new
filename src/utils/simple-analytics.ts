@@ -1,48 +1,43 @@
 /**
- * Simple Analytics Test - Minimal Working Version
+ * Simple Analytics - Minimal Working Version
  */
 
 class SimpleAnalytics {
   private sessionId: string | null = null;
-  private apiUrl = process.env.NODE_ENV === 'production' 
-    ? 'https://unexcited-nondepreciatively-justice.ngrok-free.dev/api/simple-analytics'  // Kaggle Backend Analytics
-    : 'https://unexcited-nondepreciatively-justice.ngrok-free.dev/api/simple-analytics'; // Use Kaggle for development too
+  private apiUrl = 'https://unexcited-nondepreciatively-justice.ngrok-free.dev/api/simple-analytics';
 
   constructor() {
     if (typeof window !== 'undefined') {
-      // Only initialize analytics if explicitly enabled
       const enableAnalytics = localStorage.getItem('enableAnalytics') === 'true';
       if (enableAnalytics) {
         this.initSession();
       } else {
-        console.log('📊 Analytics disabled - running in offline mode');
+        console.log('Analytics disabled - running in offline mode');
       }
     }
   }
 
   private async initSession() {
     try {
-      console.log('🧪 Testing Simple Analytics...');
+      console.log('Testing Simple Analytics...');
       
-      // Test endpoint first
       const testResponse = await fetch(`${this.apiUrl}/test`, {
         headers: { 'ngrok-skip-browser-warning': 'true' }
       });
       
       if (!testResponse.ok) {
-        console.warn('⚠️ Analytics backend not available, running in offline mode');
+        console.warn('Analytics backend not available, running in offline mode');
         return;
       }
       
       const testResult = await testResponse.json();
-      console.log('📊 Analytics test result:', testResult);
+      console.log('Analytics test result:', testResult);
       
       if (testResult.status !== 'working') {
-        console.warn('⚠️ Analytics system not working:', testResult.message);
+        console.warn('Analytics system not working:', testResult.message);
         return;
       }
 
-      // Create session
       const sessionData = {
         deviceType: this.getDeviceType(),
         browserName: this.getBrowserName(),
@@ -61,15 +56,14 @@ class SimpleAnalytics {
       if (response.ok) {
         const result = await response.json();
         this.sessionId = result.sessionId;
-        console.log('✅ Analytics session created:', this.sessionId);
+        console.log('Analytics session created:', this.sessionId);
         
-        // Track initial page view
         this.trackPageView(window.location.pathname, document.title);
       } else {
-        console.error('❌ Failed to create analytics session');
+        console.error('Failed to create analytics session');
       }
     } catch (error) {
-      console.error('❌ Analytics initialization failed:', error);
+      console.error('Analytics initialization failed:', error);
     }
   }
 
@@ -91,10 +85,10 @@ class SimpleAnalytics {
       body: JSON.stringify(pageData)
     }).then(response => {
       if (response.ok) {
-        console.log('📄 Page view tracked:', pagePath);
+        console.log('Page view tracked:', pagePath);
       }
     }).catch(error => {
-      console.error('❌ Page view tracking failed:', error);
+      console.error('Page view tracking failed:', error);
     });
   }
 
@@ -118,10 +112,10 @@ class SimpleAnalytics {
       body: JSON.stringify(interactionData)
     }).then(response => {
       if (response.ok) {
-        console.log('🖱️ Interaction tracked:', type);
+        console.log('Interaction tracked:', type);
       }
     }).catch(error => {
-      console.error('❌ Interaction tracking failed:', error);
+      console.error('Interaction tracking failed:', error);
     });
   }
 
@@ -142,10 +136,8 @@ class SimpleAnalytics {
   }
 }
 
-// Create global instance
 export const simpleAnalytics = new SimpleAnalytics();
 
-// Export convenience functions
 export const trackPageView = (pagePath: string, pageTitle: string) => 
   simpleAnalytics.trackPageView(pagePath, pageTitle);
 

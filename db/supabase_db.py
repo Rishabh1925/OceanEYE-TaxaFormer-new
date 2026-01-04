@@ -27,7 +27,7 @@ class TaxaformerDB:
                 "Missing Supabase credentials. Set SUPABASE_URL and SUPABASE_KEY environment variables."
             )
         
-        print(f"🔗 Connecting to Supabase: {self.url}")
+        print(f"Connecting to Supabase: {self.url}")
         self.client: Client = create_client(self.url, self.key)
     
     def compute_file_hash(self, file_bytes: bytes) -> str:

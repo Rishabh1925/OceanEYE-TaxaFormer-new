@@ -1,8 +1,14 @@
 """
 LOCAL Visualization Data API
 Runs locally, fetches from Supabase, formats for charts
-Kaggle backend stores data → This serves visualization endpoints
+Kaggle backend stores data -> This serves visualization endpoints
 """
+
+import os
+import sys
+
+# Add parent directory to path for db imports
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -141,13 +147,13 @@ async def get_job(job_id: str):
 
 if __name__ == "__main__":
     print("\n" + "="*70)
-    print("🌐 TAXAFORMER LOCAL VISUALIZATION API")
+    print("TAXAFORMER LOCAL VISUALIZATION API")
     print("="*70)
-    print("📊 Purpose: Fetch data from Supabase & format for charts")
-    print("🔗 Database: Supabase (data stored by Kaggle backend)")
-    print("🖥️  Running: http://localhost:3001")
+    print("Purpose: Fetch data from Supabase & format for charts")
+    print("Database: Supabase (data stored by Kaggle backend)")
+    print("Running: http://localhost:3001")
     print("="*70)
-    print("\n📡 Available Endpoints:")
+    print("\nAvailable Endpoints:")
     print("  GET /jobs                           - List all jobs")
     print("  GET /jobs/{job_id}                  - Get specific job")
     print("  GET /visualizations/composition/{job_id}?rank=phylum")

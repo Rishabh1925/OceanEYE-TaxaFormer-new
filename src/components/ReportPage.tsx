@@ -87,7 +87,7 @@ export default function ReportPage({ isDarkMode, onNavigate }: ReportPageProps) 
     setGeneratingPDF(true);
     
     try {
-      console.log('🔄 Starting enhanced PDF generation...');
+      console.log('[INFO] Starting enhanced PDF generation...');
       
       // Prepare data for PDF
       const reportData = {
@@ -127,7 +127,7 @@ export default function ReportPage({ isDarkMode, onNavigate }: ReportPageProps) 
       };
 
       // Generate PDF without problematic layout capture
-      console.log('🔄 Generating PDF without chart capture to avoid color parsing errors...');
+      console.log('[INFO] Generating PDF without chart capture to avoid color parsing errors...');
 
       // Generate PDF using text-based method (no chart capture)
       const pdfGenerator = new PDFReportGenerator();
@@ -137,9 +137,9 @@ export default function ReportPage({ isDarkMode, onNavigate }: ReportPageProps) 
       const filename = `taxaformer-report-${Date.now()}.pdf`;
       pdfGenerator.downloadPDF(filename);
       
-      console.log('✅ PDF generated and downloaded successfully (text-based charts)');
+      console.log('[OK] PDF generated and downloaded successfully (text-based charts)');
     } catch (error) {
-      console.error('❌ Error generating PDF:', error);
+      console.error('[ERROR] Error generating PDF:', error);
       alert('Error generating PDF report. Please try again.');
     } finally {
       setGeneratingPDF(false);

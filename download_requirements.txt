@@ -1,7 +1,0 @@
-# Dependencies for download_results.py
-
-# Selenium for browser automation
-selenium==4.27.1
-
-# WebDriver Manager for automatic driver installation
-webdriver-manager==4.0.2

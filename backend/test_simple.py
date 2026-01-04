@@ -10,10 +10,9 @@ def test_compute_file_hash():
     """Test file hash computation"""
     print("Testing file hash computation...")
     
-    # Same content should produce same hash
     content1 = b"ATCGATCGATCG"
     content2 = b"ATCGATCGATCG"
-    content3 = b"ATCGATCGATCX"  # Different
+    content3 = b"ATCGATCGATCX"
     
     hash1 = hashlib.sha256(content1).hexdigest()
     hash2 = hashlib.sha256(content2).hexdigest()
@@ -23,9 +22,9 @@ def test_compute_file_hash():
     assert hash1 != hash3, "Different content should produce different hash"
     assert len(hash1) == 64, "SHA-256 should be 64 characters"
     
-    print(f"  ✅ Hash 1: {hash1[:16]}...")
-    print(f"  ✅ Hash 2: {hash2[:16]}... (same as hash 1)")
-    print(f"  ✅ Hash 3: {hash3[:16]}... (different)")
+    print(f"  Hash 1: {hash1[:16]}...")
+    print(f"  Hash 2: {hash2[:16]}... (same as hash 1)")
+    print(f"  Hash 3: {hash3[:16]}... (different)")
 
 
 def test_hash_consistency():
@@ -36,26 +35,22 @@ def test_hash_consistency():
     
     hashes = [hashlib.sha256(content).hexdigest() for _ in range(5)]
     
-    # All hashes should be identical
     assert all(h == hashes[0] for h in hashes), "Hash should be consistent"
     
-    print(f"  ✅ All 5 hashes identical: {hashes[0][:16]}...")
+    print(f"  All 5 hashes identical: {hashes[0][:16]}...")
 
 
 def test_cache_scenarios():
     """Test caching logic scenarios"""
     print("Testing cache scenarios...")
     
-    # Scenario 1: Cache miss (new file)
     file_content = b">seq1\nATCGATCG\n"
     file_hash = hashlib.sha256(file_content).hexdigest()
     
-    # Simulate cache miss (no existing job)
     cached_job = None
     assert cached_job is None, "Should be cache miss for new file"
-    print("  ✅ Cache miss scenario works")
+    print("  Cache miss scenario works")
     
-    # Scenario 2: Cache hit (existing completed job)
     cached_job = {
         'job_id': 'cached-job-789',
         'file_hash': file_hash,
@@ -67,9 +62,8 @@ def test_cache_scenarios():
     assert cached_job['status'] == 'complete', "Job should be complete"
     result = cached_job['result']
     assert result is not None, "Should have cached result"
-    print("  ✅ Cache hit scenario works")
+    print("  Cache hit scenario works")
     
-    # Scenario 3: Processing job
     processing_job = {
         'job_id': 'processing-job-101',
         'file_hash': file_hash,
@@ -79,7 +73,7 @@ def test_cache_scenarios():
     
     assert processing_job['status'] == 'processing', "Job should be processing"
     assert processing_job['result'] is None, "Should not have result yet"
-    print("  ✅ Processing scenario works")
+    print("  Processing scenario works")
 
 
 def test_sample_data_format():
@@ -112,21 +106,18 @@ def test_sample_data_format():
         ]
     }
     
-    # Validate structure
     assert "metadata" in sample_result
     assert "taxonomy_summary" in sample_result
     assert "sequences" in sample_result
     assert "cluster_data" in sample_result
-    print("  ✅ Main structure valid")
+    print("  Main structure valid")
     
-    # Validate metadata
     metadata = sample_result["metadata"]
     assert "sampleName" in metadata
     assert "totalSequences" in metadata
     assert isinstance(metadata["totalSequences"], int)
-    print("  ✅ Metadata structure valid")
+    print("  Metadata structure valid")
     
-    # Validate sequences
     sequences = sample_result["sequences"]
     assert len(sequences) > 0
     
@@ -134,14 +125,13 @@ def test_sample_data_format():
     required_fields = ["accession", "taxonomy", "length", "confidence", "overlap", "cluster"]
     for field in required_fields:
         assert field in seq, f"Sequence missing required field: {field}"
-    print("  ✅ Sequence structure valid")
+    print("  Sequence structure valid")
 
 
 def test_api_response_format():
     """Test new API response format with job_id"""
     print("Testing API response format...")
     
-    # New response format with caching
     response = {
         "status": "success",
         "job_id": "550e8400-e29b-41d4-a716-446655440000",
@@ -152,7 +142,6 @@ def test_api_response_format():
         }
     }
     
-    # Validate new fields
     assert "status" in response
     assert "job_id" in response
     assert "cached" in response
@@ -160,16 +149,16 @@ def test_api_response_format():
     
     assert response["status"] == "success"
     assert isinstance(response["cached"], bool)
-    assert len(response["job_id"]) == 36  # UUID length
+    assert len(response["job_id"]) == 36
     
-    print("  ✅ API response format valid")
-    print(f"  ✅ Job ID: {response['job_id']}")
-    print(f"  ✅ Cached: {response['cached']}")
+    print("  API response format valid")
+    print(f"  Job ID: {response['job_id']}")
+    print(f"  Cached: {response['cached']}")
 
 
 def main():
     """Run all tests"""
-    print("🧪 Running Taxaformer Caching Tests")
+    print("Running Taxaformer Caching Tests")
     print("=" * 50)
     
     try:
@@ -188,20 +177,20 @@ def main():
         test_api_response_format()
         print()
         
-        print("🎉 ALL TESTS PASSED!")
+        print("ALL TESTS PASSED!")
         print("=" * 50)
-        print("✅ File hashing works correctly")
-        print("✅ Cache logic scenarios work")
-        print("✅ Data formats are valid")
-        print("✅ API response format is correct")
+        print("- File hashing works correctly")
+        print("- Cache logic scenarios work")
+        print("- Data formats are valid")
+        print("- API response format is correct")
         print()
-        print("💡 Ready to deploy with database caching!")
+        print("Ready to deploy with database caching!")
         
     except AssertionError as e:
-        print(f"❌ TEST FAILED: {e}")
+        print(f"TEST FAILED: {e}")
         return False
     except Exception as e:
-        print(f"❌ UNEXPECTED ERROR: {e}")
+        print(f"UNEXPECTED ERROR: {e}")
         return False
     
     return True

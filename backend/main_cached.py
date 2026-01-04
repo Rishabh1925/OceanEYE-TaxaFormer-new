@@ -24,24 +24,24 @@ try:
     # Try importing from same directory first
     from .analytics_api import add_analytics_to_app
     ANALYTICS_AVAILABLE = True
-    print("✅ Analytics module loaded")
+    print("[OK] Analytics module loaded")
 except ImportError:
     try:
         # Fallback to direct import
         import analytics_api
         add_analytics_to_app = analytics_api.add_analytics_to_app
         ANALYTICS_AVAILABLE = True
-        print("✅ Analytics module loaded (fallback)")
+        print("[OK] Analytics module loaded (fallback)")
     except ImportError:
         ANALYTICS_AVAILABLE = False
-        print("⚠️ Analytics module not available")
+        print("[WARN] Analytics module not available")
 
 # Import queue system
 try:
     # Try importing from same directory first
     from .queue_system import processing_queue, QueueJob
     QUEUE_AVAILABLE = True
-    print("✅ Queue system loaded")
+    print("[OK] Queue system loaded")
 except ImportError:
     try:
         # Fallback to direct import
@@ -49,10 +49,10 @@ except ImportError:
         processing_queue = queue_system.processing_queue
         QueueJob = queue_system.QueueJob
         QUEUE_AVAILABLE = True
-        print("✅ Queue system loaded (fallback)")
+        print("[OK] Queue system loaded (fallback)")
     except ImportError:
         QUEUE_AVAILABLE = False
-        print("⚠️ Queue system not available")
+        print("[WARN] Queue system not available")
 
 # Feature flag for database usage
 USE_DATABASE = os.getenv("USE_DATABASE", "true").lower() == "true"
@@ -63,10 +63,10 @@ if USE_DATABASE:
     try:
         from db.supabase_db import TaxaformerDB
         db = TaxaformerDB()
-        print("✅ Supabase database connected")
+        print("[OK] Supabase database connected")
     except Exception as e:
-        print(f"⚠️ Database not available: {e}")
-        print("⚠️ Backend will work without database (no data persistence)")
+        print(f"[WARN] Database not available: {e}")
+        print("[WARN] Backend will work without database (no data persistence)")
         USE_DATABASE = False
 
 # Initialize FastAPI app
@@ -95,15 +95,15 @@ os.makedirs(TEMP_DIR, exist_ok=True)
 # Add analytics to the app
 if ANALYTICS_AVAILABLE:
     add_analytics_to_app(app)
-    print("📊 Analytics endpoints added to main API")
+    print("[OK] Analytics endpoints added to main API")
 
 # Add simple analytics as backup
 try:
     from simple_analytics import add_simple_analytics
     add_simple_analytics(app)
-    print("📊 Simple Analytics endpoints added")
+    print("[OK] Simple Analytics endpoints added")
 except ImportError:
-    print("⚠️ Simple Analytics not available")
+    print("[WARN] Simple Analytics not available")
 
 # Add queue endpoints
 @app.get("/queue/status")
@@ -174,9 +174,9 @@ async def analyze_endpoint(
         if metadata:
             try:
                 parsed_metadata = json.loads(metadata)
-                print(f"📋 Received metadata: {parsed_metadata}")
+                print(f"[INFO] Received metadata: {parsed_metadata}")
             except json.JSONDecodeError as e:
-                print(f"⚠️ Warning: Could not parse metadata: {e}")
+                print(f"[WARN] Warning: Could not parse metadata: {e}")
         
         # Validate file
         if not file.filename:
@@ -195,14 +195,14 @@ async def analyze_endpoint(
         file_bytes = await file.read()
         file_hash = compute_file_hash(file_bytes)
         
-        print(f"📁 File: {file.filename} ({len(file_bytes)} bytes)")
-        print(f"🔍 Hash: {file_hash[:16]}...")
+        print(f"[INFO] File: {file.filename} ({len(file_bytes)} bytes)")
+        print(f"[INFO] Hash: {file_hash[:16]}...")
         
         # Check cache if database is enabled
         if USE_DATABASE and db:
             cached_job = db.get_job_by_hash(file_hash)
             if cached_job and cached_job.get('status') == 'complete':
-                print(f"💾 Cache HIT: Returning cached result for job {cached_job['job_id']}")
+                print(f"[CACHE] Cache HIT: Returning cached result for job {cached_job['job_id']}")
                 return {
                     "status": "success",
                     "job_id": cached_job["job_id"],
@@ -248,7 +248,7 @@ async def analyze_endpoint(
                 next_job = await processing_queue.process_next_job()
                 if next_job and next_job.job_id == job_id:
                     # Process immediately
-                    print(f"🚀 Processing immediately: {file.filename}")
+                    print(f"[INFO] Processing immediately: {file.filename}")
                 else:
                     # Return queue status
                     queue_status = processing_queue.get_queue_status(session_id)
@@ -261,7 +261,7 @@ async def analyze_endpoint(
                     }
                     
             except Exception as queue_error:
-                print(f"⚠️ Queue error: {queue_error}")
+                print(f"[WARN] Queue error: {queue_error}")
                 return {
                     "status": "error",
                     "message": str(queue_error)
@@ -278,7 +278,7 @@ async def analyze_endpoint(
                     "message": "Analysis in progress. Please check back later."
                 }
             elif cached_job and cached_job.get('status') == 'failed':
-                print(f"⚠️ Previous analysis failed, retrying...")
+                print(f"[WARN] Previous analysis failed, retrying...")
         
         # Create processing job record if database enabled
         job_id = None
@@ -289,9 +289,9 @@ async def analyze_endpoint(
                     filename=file.filename,
                     status="processing"
                 )
-                print(f"📝 Created processing job: {job_id}")
+                print(f"[INFO] Created processing job: {job_id}")
             except Exception as db_error:
-                print(f"⚠️ Failed to create job record: {db_error}")
+                print(f"[WARN] Failed to create job record: {db_error}")
                 # Continue without database
         
         # Save uploaded file temporarily for processing
@@ -300,7 +300,7 @@ async def analyze_endpoint(
         with open(temp_filepath, "wb") as buffer:
             buffer.write(file_bytes)
         
-        print(f"🔬 Processing file: {file.filename}")
+        print(f"[INFO] Processing file: {file.filename}")
         
         # Process file through pipeline
         start_time = datetime.now()
@@ -319,7 +319,7 @@ async def analyze_endpoint(
                     "userMetadata": parsed_metadata
                 }
             
-            print(f"✅ Analysis complete: {file.filename} ({processing_time:.2f}s)")
+            print(f"[OK] Analysis complete: {file.filename} ({processing_time:.2f}s)")
             
             # Update job with results if database enabled
             if USE_DATABASE and db and job_id:
@@ -339,10 +339,10 @@ async def analyze_endpoint(
                     if "metadata" in result_data:
                         db._store_sample_metadata(job_id, result_data["metadata"])
                     
-                    print(f"💾 Updated job record: {job_id}")
+                    print(f"[OK] Updated job record: {job_id}")
                     
                 except Exception as db_error:
-                    print(f"⚠️ Database update failed: {db_error}")
+                    print(f"[WARN] Database update failed: {db_error}")
                     # Continue - analysis succeeded even if storage failed
             
             # Mark queue job as completed
@@ -383,7 +383,7 @@ async def analyze_endpoint(
         raise
         
     except Exception as e:
-        print(f"❌ Error processing file: {str(e)}")
+        print(f"[ERROR] Error processing file: {str(e)}")
         import traceback
         traceback.print_exc()
         
@@ -590,37 +590,37 @@ def start_server(port: int = 8000, use_ngrok: bool = True, ngrok_token: str = No
         try:
             public_url = ngrok.connect(port).public_url
             print("\n" + "="*60)
-            print("🚀 TAXAFORMER API STARTED (WITH CACHING)")
+            print("TAXAFORMER API STARTED (WITH CACHING)")
             print("="*60)
-            print(f"📡 PUBLIC URL: {public_url}")
-            print(f"🔧 LOCAL URL:  http://localhost:{port}")
-            print(f"💾 DATABASE:   {'Connected' if db else 'Disabled'}")
-            print(f"🔄 CACHING:    {'Enabled' if USE_DATABASE else 'Disabled'}")
+            print(f"PUBLIC URL: {public_url}")
+            print(f"LOCAL URL:  http://localhost:{port}")
+            print(f"DATABASE:   {'Connected' if db else 'Disabled'}")
+            print(f"CACHING:    {'Enabled' if USE_DATABASE else 'Disabled'}")
             print("="*60)
-            print("\n⚡ Copy the PUBLIC URL to your frontend configuration!")
+            print("\nCopy the PUBLIC URL to your frontend configuration!")
             print(f"   Update API_URL in your frontend to: {public_url}")
-            print("\n📝 Example fetch usage:")
+            print("\nExample fetch usage:")
             print(f'   fetch("{public_url}/analyze", {{ method: "POST", body: formData }})')
             
             if USE_DATABASE:
-                print("\n🔄 Caching Features:")
-                print("   • Identical files return cached results instantly")
-                print("   • All results stored permanently in Supabase")
-                print("   • Job tracking with unique job_id")
+                print("\nCaching Features:")
+                print("   - Identical files return cached results instantly")
+                print("   - All results stored permanently in Supabase")
+                print("   - Job tracking with unique job_id")
             
             print("\n" + "="*60 + "\n")
         except Exception as e:
-            print(f"\n❌ Failed to create ngrok tunnel: {e}")
-            print("\n💡 Try these solutions:")
+            print(f"\n[ERROR] Failed to create ngrok tunnel: {e}")
+            print("\nTry these solutions:")
             print("1. Check if ngrok is already running elsewhere")
             print("2. Get a new auth token from: https://dashboard.ngrok.com/")
             print("3. Run without ngrok: Set USE_NGROK = False in main.py")
             raise
     else:
-        print(f"\n🚀 Server starting on http://localhost:{port}")
-        print(f"💾 DATABASE: {'Connected' if db else 'Disabled'}")
-        print(f"🔄 CACHING: {'Enabled' if USE_DATABASE else 'Disabled'}")
-        print("⚠️  No ngrok tunnel - local access only\n")
+        print(f"\nServer starting on http://localhost:{port}")
+        print(f"DATABASE: {'Connected' if db else 'Disabled'}")
+        print(f"CACHING: {'Enabled' if USE_DATABASE else 'Disabled'}")
+        print("No ngrok tunnel - local access only\n")
     
     # Run server
     uvicorn.run(app, host="0.0.0.0", port=port)

@@ -7,7 +7,7 @@ from datetime import datetime
 
 def test_database_connection():
     """Test database connection and insert sample data"""
-    print("🧪 Testing Supabase Database Connection...")
+    print("Testing Supabase Database Connection...")
     
     try:
         # Try to import supabase
@@ -19,7 +19,7 @@ def test_database_connection():
         
         # Create client
         client = create_client(url, key)
-        print("✅ Connected to Supabase successfully!")
+        print("Connected to Supabase successfully!")
         
         # Test inserting a sample record
         test_file_content = b">test_seq\nATCGATCGATCG\n"
@@ -46,52 +46,52 @@ def test_database_connection():
             }
         }
         
-        print("📝 Inserting test record...")
+        print("Inserting test record...")
         response = client.table('analysis_jobs').insert(test_data).execute()
         
         if response.data:
             job_id = response.data[0]['job_id']
-            print(f"✅ Test record inserted with job_id: {job_id}")
+            print(f"Test record inserted with job_id: {job_id}")
             
             # Test retrieving the record
-            print("🔍 Testing retrieval by file hash...")
+            print("Testing retrieval by file hash...")
             retrieve_response = client.table('analysis_jobs').select('*').eq('file_hash', file_hash).execute()
             
             if retrieve_response.data:
-                print("✅ Record retrieved successfully!")
+                print("Record retrieved successfully!")
                 print(f"   Filename: {retrieve_response.data[0]['filename']}")
                 print(f"   Status: {retrieve_response.data[0]['status']}")
                 
                 # Clean up test record
-                print("🧹 Cleaning up test record...")
+                print("Cleaning up test record...")
                 client.table('analysis_jobs').delete().eq('job_id', job_id).execute()
-                print("✅ Test record cleaned up")
+                print("Test record cleaned up")
                 
-                print("\n🎉 DATABASE CONNECTION TEST PASSED!")
-                print("✅ Connection works")
-                print("✅ Insert works")
-                print("✅ Retrieve works")
-                print("✅ Delete works")
+                print("\nDATABASE CONNECTION TEST PASSED!")
+                print("- Connection works")
+                print("- Insert works")
+                print("- Retrieve works")
+                print("- Delete works")
                 
                 return True
             else:
-                print("❌ Failed to retrieve test record")
+                print("Failed to retrieve test record")
                 return False
         else:
-            print("❌ Failed to insert test record")
+            print("Failed to insert test record")
             return False
             
     except ImportError:
-        print("❌ Supabase package not installed")
-        print("💡 Install with: pip install supabase")
+        print("Supabase package not installed")
+        print("Install with: pip install supabase")
         return False
     except Exception as e:
-        print(f"❌ Database test failed: {e}")
+        print(f"Database test failed: {e}")
         return False
 
 if __name__ == "__main__":
     success = test_database_connection()
     if success:
-        print("\n🚀 Ready to use database caching!")
+        print("\nReady to use database caching!")
     else:
-        print("\n⚠️ Database setup needs attention")
+        print("\nDatabase setup needs attention")
