@@ -15,9 +15,9 @@ try:
     
     supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
     ANALYTICS_ENABLED = True
-    print("✅ Simple Analytics: Supabase connected")
+    print("Simple Analytics: Supabase connected")
 except Exception as e:
-    print(f"⚠️ Simple Analytics: Supabase not available: {e}")
+    print(f"Simple Analytics: Supabase not available: {e}")
     supabase = None
     ANALYTICS_ENABLED = False
 
@@ -65,12 +65,12 @@ def add_simple_analytics(app: FastAPI):
             }
             
             result = supabase.table('user_sessions').insert(session_record).execute()
-            print(f"📊 Session created: {session_id}")
+            print(f"Session created: {session_id}")
             
             return {"sessionId": session_id, "status": "created"}
             
         except Exception as e:
-            print(f"❌ Session creation failed: {e}")
+            print(f"Session creation failed: {e}")
             return {"sessionId": "error", "status": "error", "message": str(e)}
     
     @app.post("/api/simple-analytics/page-view")
@@ -90,12 +90,12 @@ def add_simple_analytics(app: FastAPI):
             }
             
             result = supabase.table('page_views').insert(page_record).execute()
-            print(f"📄 Page view tracked: {page_data.pagePath}")
+            print(f"Page view tracked: {page_data.pagePath}")
             
             return {"status": "tracked"}
             
         except Exception as e:
-            print(f"❌ Page view tracking failed: {e}")
+            print(f"Page view tracking failed: {e}")
             return {"status": "error", "message": str(e)}
     
     @app.post("/api/simple-analytics/interaction")
@@ -116,12 +116,12 @@ def add_simple_analytics(app: FastAPI):
             }
             
             result = supabase.table('user_interactions').insert(interaction_record).execute()
-            print(f"🖱️ Interaction tracked: {interaction_data.interactionType}")
+            print(f"Interaction tracked: {interaction_data.interactionType}")
             
             return {"status": "tracked"}
             
         except Exception as e:
-            print(f"❌ Interaction tracking failed: {e}")
+            print(f"Interaction tracking failed: {e}")
             return {"status": "error", "message": str(e)}
     
     @app.get("/api/simple-analytics/test")
@@ -148,5 +148,5 @@ def add_simple_analytics(app: FastAPI):
                 "database": "error"
             }
     
-    print("📊 Simple Analytics endpoints added")
+    print("Simple Analytics endpoints added")
     return True

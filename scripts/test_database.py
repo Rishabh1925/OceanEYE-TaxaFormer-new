@@ -3,15 +3,20 @@ Quick Test Script for Supabase Database
 Run this to verify everything is working
 """
 
-print("🧪 Testing Supabase Database Connection...\n")
+import os
+import sys
+
+# Add parent directory to path for db imports
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+print("Testing Supabase Database Connection...\n")
 
 try:
     from db.supabase_db import TaxaformerDB
     
     db = TaxaformerDB()
-    print("✅ Database module imported successfully")
+    print("Database module imported successfully")
     
-    # Test data
     test_metadata = {
         "sampleId": "TEST_001",
         "depth": 3500,
@@ -41,59 +46,54 @@ try:
         ]
     }
     
-    print("\n📤 Storing test analysis...")
+    print("\nStoring test analysis...")
     job_id = db.store_analysis(
         filename="test_sample.fasta",
         metadata=test_metadata,
         analysis_result=test_result
     )
     
-    print(f"✅ Stored successfully!")
+    print(f"Stored successfully!")
     print(f"   Job ID: {job_id}")
     
-    print("\n📊 Testing visualization data generation...")
+    print("\nTesting visualization data generation...")
     
-    # Test composition
     composition = db.get_taxonomic_composition(job_id, rank="phylum")
-    print(f"✅ Taxonomic composition: {len(composition)} taxa found")
+    print(f"Taxonomic composition: {len(composition)} taxa found")
     for taxon in composition[:3]:
         print(f"   - {taxon['name']}: {taxon['value']} ({taxon['percentage']}%)")
     
-    # Test hierarchy
     hierarchy = db.get_hierarchical_data(job_id)
-    print(f"\n✅ Hierarchical data: {len(hierarchy.get('children', []))} top-level groups")
+    print(f"\nHierarchical data: {len(hierarchy.get('children', []))} top-level groups")
     
-    # Test Sankey
     sankey = db.get_sankey_data(job_id)
-    print(f"✅ Sankey data: {len(sankey['nodes'])} nodes, {len(sankey['links'])} links")
+    print(f"Sankey data: {len(sankey['nodes'])} nodes, {len(sankey['links'])} links")
     
-    # Test retrieval
-    print("\n📥 Retrieving stored job...")
+    print("\nRetrieving stored job...")
     retrieved = db.get_job_by_id(job_id)
     if retrieved:
-        print(f"✅ Retrieved job: {retrieved['filename']}")
+        print(f"Retrieved job: {retrieved['filename']}")
         print(f"   Created: {retrieved['created_at']}")
     
     print("\n" + "="*60)
-    print("🎉 ALL TESTS PASSED!")
+    print("ALL TESTS PASSED!")
     print("="*60)
-    print("\n✅ Database is ready to use!")
-    print(f"✅ Test job stored with ID: {job_id}")
-    print("\n📋 Next steps:")
+    print("\nDatabase is ready to use!")
+    print(f"Test job stored with ID: {job_id}")
+    print("\nNext steps:")
     print("   1. Check Supabase dashboard to see your test data")
     print("   2. Start your backend: python backend/main_with_db.py")
     print("   3. Start your frontend: npm run dev")
     print("\n" + "="*60 + "\n")
 
 except ImportError as e:
-    print(f"❌ Import Error: {e}")
-    print("\n💡 Solution:")
+    print(f"Import Error: {e}")
+    print("\nSolution:")
     print("   pip install -r db/db_requirements.txt")
 
 except Exception as e:
-    print(f"\n❌ Error: {e}")
-    print("\n💡 Possible issues:")
+    print(f"\nError: {e}")
+    print("\nPossible issues:")
     print("   1. Run SQL schema in Supabase Dashboard first")
     print("   2. Check Supabase credentials in db/supabase_db.py")
     print("   3. Verify internet connection")
-    print("\n📖 See SETUP_DATABASE.md for detailed instructions")

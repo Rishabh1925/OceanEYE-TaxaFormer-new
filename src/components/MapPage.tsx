@@ -107,7 +107,7 @@ export default function MapPage({ isDarkMode, onNavigate }: MapPageProps) {
           
           setRealLocations([realLocation]);
           setHasMetadata(true);
-          console.log('✅ Real metadata loaded for map:', realLocation);
+          console.log('Real metadata loaded for map:', realLocation);
           return;
         }
       }

@@ -220,27 +220,27 @@ def test_sample_data_format():
 
 def run_manual_tests():
     """Run tests that don't require pytest"""
-    print("🧪 Running caching tests...")
+    print("Running caching tests...")
     
     # Test hash computation
     test_hash = TestFileCaching()
     test_hash.test_compute_file_hash()
     test_hash.test_hash_consistency()
-    print("✅ Hash tests passed")
+    print("[OK] Hash tests passed")
     
     # Test data format
     test_sample_data_format()
-    print("✅ Data format tests passed")
+    print("[OK] Data format tests passed")
     
     # Test integration scenarios
     test_integration = TestIntegrationScenarios()
     test_integration.test_cache_miss_scenario()
     test_integration.test_cache_hit_scenario()
     test_integration.test_processing_scenario()
-    print("✅ Integration scenario tests passed")
+    print("[OK] Integration scenario tests passed")
     
-    print("🎉 All manual tests passed!")
-    print("\n💡 To run full test suite with mocks:")
+    print("All manual tests passed!")
+    print("\nTo run full test suite with mocks:")
     print("   pip install pytest")
     print("   python -m pytest test_caching.py -v")
 

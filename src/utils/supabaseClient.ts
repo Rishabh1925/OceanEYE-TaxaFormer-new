@@ -15,44 +15,47 @@ export interface SampleFile {
 
 export async function fetchSampleFilesFromSupabase(): Promise<SampleFile[]> {
   try {
-    console.log("🔍 Fetching sample files directly from Supabase...");
+    console.log("Fetching sample files directly from Supabase...");
     
-    // First, try to get all jobs regardless of status to see what's in the database
+    // Add timeout to prevent hanging
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    
     const response = await fetch(`${SUPABASE_URL}/rest/v1/analysis_jobs?order=created_at.desc&limit=20`, {
       headers: {
         'apikey': SUPABASE_ANON_KEY,
         'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
         'Content-Type': 'application/json'
-      }
+      },
+      signal: controller.signal
     });
+    
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("❌ Supabase API Error:", response.status, errorText);
+      console.error("Supabase API Error:", response.status, errorText);
       throw new Error(`Supabase API returned ${response.status}: ${errorText}`);
     }
 
     const jobs = await response.json();
-    console.log("✅ Successfully fetched from Supabase:", jobs.length, "jobs");
-    console.log("📊 Sample job data:", jobs[0]); // Log first job to see structure
+    console.log("Successfully fetched from Supabase:", jobs.length, "jobs");
+    console.log("Sample job data:", jobs[0]);
     
     if (jobs.length === 0) {
-      console.log("⚠️ No jobs found in database");
+      console.log("No jobs found in database");
       throw new Error("No analysis jobs found in database");
     }
     
     const samples: SampleFile[] = jobs
-      .filter((job: any) => job.status === 'complete' || job.status === 'success') // Filter completed jobs
+      .filter((job: any) => job.status === 'complete' || job.status === 'success')
       .map((job: any) => {
-        // Handle both 'result' and 'analysis_result' column names
         const result = job.result || job.analysis_result || {};
         const metadata = result.metadata || {};
         
-        // Calculate novel species count more accurately
         let novelCount = 0;
         if (result.sequences && Array.isArray(result.sequences)) {
           novelCount = result.sequences.filter((seq: any) => {
-            // Check multiple possible fields for novel species indication
             return seq.status === 'Novel' || 
                    seq.novelty_score > 0.5 || 
                    (seq.confidence && seq.confidence < 0.5) ||
@@ -61,12 +64,10 @@ export async function fetchSampleFilesFromSupabase(): Promise<SampleFile[]> {
           }).length;
         }
 
-        // Get data from metadata or calculate defaults
         const filename = job.filename || 'Unknown File';
         const totalSeqs = metadata.totalSequences || (result.sequences ? result.sequences.length : 150);
         const avgConfidence = metadata.avgConfidence || 85;
         
-        // Calculate file size estimate (sequences * average length / 1024 / 1024)
         const estimatedFileSize = Math.round(totalSeqs * 0.002 + Math.random() * 5 + 3);
 
         return {
@@ -81,29 +82,37 @@ export async function fetchSampleFilesFromSupabase(): Promise<SampleFile[]> {
         };
       });
     
-    console.log("✅ Processed", samples.length, "completed jobs");
+    console.log("Processed", samples.length, "completed jobs");
     return samples;
   } catch (error) {
-    console.error("❌ Failed to fetch from Supabase:", error);
+    // Log as info instead of error since fallback will handle it
+    console.log("Supabase unavailable, will use fallback data:", error instanceof Error ? error.message : "Network error");
     throw error;
   }
 }
 
 export async function fetchSampleDataFromSupabase(jobId: string): Promise<any> {
   try {
-    console.log("🔍 Fetching sample data for job:", jobId);
+    console.log("Fetching sample data for job:", jobId);
+    
+    // Add timeout to prevent hanging
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
     
     const response = await fetch(`${SUPABASE_URL}/rest/v1/analysis_jobs?job_id=eq.${jobId}`, {
       headers: {
         'apikey': SUPABASE_ANON_KEY,
         'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
         'Content-Type': 'application/json'
-      }
+      },
+      signal: controller.signal
     });
+    
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("❌ Supabase API Error:", response.status, errorText);
+      console.error("Supabase API Error:", response.status, errorText);
       throw new Error(`Supabase API returned ${response.status}: ${errorText}`);
     }
 
@@ -114,14 +123,13 @@ export async function fetchSampleDataFromSupabase(jobId: string): Promise<any> {
     }
 
     const job = jobs[0];
-    console.log("✅ Successfully fetched sample data from Supabase");
+    console.log("Successfully fetched sample data from Supabase");
     
-    // Handle both 'result' and 'analysis_result' column names
     const result = job.result || job.analysis_result || {};
     
     return result;
   } catch (error) {
-    console.error("❌ Failed to fetch sample data from Supabase:", error);
+    console.log("Supabase unavailable for sample data:", error instanceof Error ? error.message : "Network error");
     throw error;
   }
 }

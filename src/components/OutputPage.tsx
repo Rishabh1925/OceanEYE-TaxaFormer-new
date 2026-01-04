@@ -34,7 +34,7 @@ const validateTaxonomySummary = (data: any[]): any[] => {
 
 // Helper function to transform various JSON formats
 const transformBackendData = (rawData: any) => {
-  console.log('🔄 Transforming backend data...');
+  console.log('Transforming backend data...');
   
   const transformed: any = {
     taxonomy_summary: [],
@@ -95,7 +95,7 @@ const transformBackendData = (rawData: any) => {
     avgConfidence: rawData.metadata?.avgConfidence || rawData.avgConfidence || rawData.avg_confidence || rawData.confidence || 0
   };
   
-  console.log('✅ Transformation complete:', {
+  console.log('Transformation complete:', {
     taxonomyCount: transformed.taxonomy_summary.length,
     sequenceCount: transformed.sequences.length,
     clusterCount: transformed.cluster_data.length
@@ -142,13 +142,13 @@ export default function OutputPage({ isDarkMode, onNavigate }: OutputPageProps) 
   // Load real data from localStorage on mount
   useEffect(() => {
     const storedData = localStorage.getItem('analysisResults');
-    console.log('🔍 OutputPage - Checking localStorage...');
+    console.log('OutputPage - Checking localStorage...');
     
     if (storedData) {
       try {
         const rawResults = JSON.parse(storedData);
-        console.log('📊 Raw Analysis Results:', rawResults);
-        console.log('📋 Result Keys:', Object.keys(rawResults));
+        console.log('Raw Analysis Results:', rawResults);
+        console.log('Result Keys:', Object.keys(rawResults));
         
         // Store raw data for dynamic calculations
         setAnalysisData(rawResults);
@@ -176,13 +176,13 @@ export default function OutputPage({ isDarkMode, onNavigate }: OutputPageProps) 
           setAnalysisMetadata(transformed.metadata);
         }
         
-        console.log('✅ Data loaded and transformed successfully');
+        console.log('Data loaded and transformed successfully');
       } catch (error) {
-        console.error('❌ Failed to parse analysis results:', error);
+        console.error('Failed to parse analysis results:', error);
         console.error('Error details:', error);
       }
     } else {
-      console.log('ℹ️ No stored results found');
+      console.log('No stored results found');
     }
     
     setLoading(false);
@@ -247,7 +247,7 @@ export default function OutputPage({ isDarkMode, onNavigate }: OutputPageProps) 
   };
 
   const handleExportCSV = () => {
-    console.log('🔽 Export CSV function called from OutputPage!');
+    console.log('Export CSV function called from OutputPage!');
     console.log('Filtered data length:', filteredTableData.length);
     
     const headers = ['Sequence_ID', 'Predicted_Taxonomy', 'Confidence', 'Length', 'Overlap', 'Cluster'];

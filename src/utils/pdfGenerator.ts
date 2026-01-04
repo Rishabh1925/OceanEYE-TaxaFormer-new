@@ -137,7 +137,7 @@ export class PDFReportGenerator {
 
   public async generateReport(data: ReportData): Promise<void> {
     try {
-      console.log('🔄 Generating PDF report...', data);
+      console.log('Generating PDF report...', data);
 
       // Validate data
       if (!data || !data.metadata) {
@@ -167,9 +167,9 @@ export class PDFReportGenerator {
       this.addNewPage();
       this.addMethodology();
 
-      console.log('✅ PDF report generated successfully');
+      console.log('PDF report generated successfully');
     } catch (error) {
-      console.error('❌ Error generating PDF report:', error);
+      console.error('Error generating PDF report:', error);
       throw error;
     }
   }

@@ -35,7 +35,7 @@ try:
         def __init__(self):
             self.url = os.getenv("SUPABASE_URL", "https://nbnyhdwbnxbheombbhtv.supabase.co")
             self.key = os.getenv("SUPABASE_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ibnloZHdibnhiaGVvbWJiaHR2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0MDIyNDksImV4cCI6MjA4MDk3ODI0OX0.u5DxN1eX-K85WepTNCEs5sJw9M13YLmGm5pVe1WKy34")
-            print(f"🔗 Connecting to Supabase: {self.url}")
+            print(f"[INFO] Connecting to Supabase: {self.url}")
             self.client = create_client(self.url, self.key)
 
         def compute_file_hash(self, file_bytes: bytes) -> str:
@@ -118,10 +118,10 @@ try:
 
     # Initialize database
     db = TaxaformerDB()
-    print("✅ Supabase database connected")
+    print("[OK] Supabase database connected")
     
 except Exception as e:
-    print(f"⚠️ Database not available: {e}")
+    print(f"[WARN] Database not available: {e}")
     db = None
 
 # ================================
@@ -174,7 +174,7 @@ class ProcessingQueue:
         )
         
         self.queue.append(job)
-        print(f"📋 Job added to queue: {filename} (Position: {len(self.queue)})")
+        print(f"[INFO] Job added to queue: {filename} (Position: {len(self.queue)})")
         return job
 
     def get_queue_status(self, user_session: str) -> Dict:
@@ -224,7 +224,7 @@ class ProcessingQueue:
             if self.current_job and self.current_job.status == JobStatus.PROCESSING:
                 if self.current_job.started_at and \
                    (datetime.now() - self.current_job.started_at).total_seconds() > self.job_timeout:
-                    print(f"⏰ Job timed out: {self.current_job.filename}")
+                    print(f"[TIMEOUT] Job timed out: {self.current_job.filename}")
                     self.current_job.status = JobStatus.FAILED
                     self.current_job = None
                 else:
@@ -236,7 +236,7 @@ class ProcessingQueue:
                 next_job.started_at = datetime.now()
                 self.current_job = next_job
                 
-                print(f"🔄 Processing job: {next_job.filename}")
+                print(f"[INFO] Processing job: {next_job.filename}")
                 return next_job
             
             return None
@@ -251,7 +251,7 @@ class ProcessingQueue:
             self.current_job.completed_at = datetime.now()
             self.current_job.progress = 100 if success else 0
             
-            print(f"✅ Job completed: {self.current_job.filename} ({'success' if success else 'failed'})")
+            print(f"[OK] Job completed: {self.current_job.filename} ({'success' if success else 'failed'})")
             asyncio.create_task(self.clear_completed_job_after_delay())
 
     async def clear_completed_job_after_delay(self):
@@ -492,12 +492,12 @@ async def create_simple_session(session_data: SimpleSession, request: Request):
         }
         
         db.client.table('user_sessions').insert(session_record).execute()
-        print(f"📊 Session created: {session_id}")
+        print(f"[OK] Session created: {session_id}")
         
         return {"sessionId": session_id, "status": "created"}
         
     except Exception as e:
-        print(f"❌ Session creation failed: {e}")
+        print(f"[ERROR] Session creation failed: {e}")
         return {"sessionId": "error", "status": "error", "message": str(e)}
 
 @app.post("/api/simple-analytics/page-view")
@@ -517,12 +517,12 @@ async def track_simple_page_view(page_data: SimplePageView):
         }
         
         db.client.table('page_views').insert(page_record).execute()
-        print(f"📄 Page view tracked: {page_data.pagePath}")
+        print(f"[OK] Page view tracked: {page_data.pagePath}")
         
         return {"status": "tracked"}
         
     except Exception as e:
-        print(f"❌ Page view tracking failed: {e}")
+        print(f"[ERROR] Page view tracking failed: {e}")
         return {"status": "error", "message": str(e)}
 
 @app.post("/api/simple-analytics/interaction")
@@ -543,12 +543,12 @@ async def track_simple_interaction(interaction_data: SimpleInteraction):
         }
         
         db.client.table('user_interactions').insert(interaction_record).execute()
-        print(f"🖱️ Interaction tracked: {interaction_data.interactionType}")
+        print(f"[OK] Interaction tracked: {interaction_data.interactionType}")
         
         return {"status": "tracked"}
         
     except Exception as e:
-        print(f"❌ Interaction tracking failed: {e}")
+        print(f"[ERROR] Interaction tracking failed: {e}")
         return {"status": "error", "message": str(e)}
 
 @app.get("/api/simple-analytics/test")
@@ -627,9 +627,9 @@ async def analyze_endpoint(
         if metadata:
             try:
                 parsed_metadata = json.loads(metadata)
-                print(f"📋 Received metadata: {list(parsed_metadata.keys())}")
+                print(f"[INFO] Received metadata: {list(parsed_metadata.keys())}")
             except json.JSONDecodeError as e:
-                print(f"⚠️ Warning: Could not parse metadata: {e}")
+                print(f"[WARN] Warning: Could not parse metadata: {e}")
 
         # Validate file
         if not file.filename:
@@ -647,14 +647,14 @@ async def analyze_endpoint(
         file_bytes = await file.read()
         file_hash = hashlib.sha256(file_bytes).hexdigest()
         
-        print(f"📁 File: {file.filename} ({len(file_bytes)} bytes)")
-        print(f"🔍 Hash: {file_hash[:16]}...")
+        print(f"[INFO] File: {file.filename} ({len(file_bytes)} bytes)")
+        print(f"[INFO] Hash: {file_hash[:16]}...")
 
         # Check cache if database is enabled
         if db:
             cached_job = db.get_job_by_hash(file_hash)
             if cached_job and cached_job.get('status') == 'complete':
-                print(f"💾 Cache HIT: Returning cached result for job {cached_job['job_id']}")
+                print(f"[CACHE] Cache HIT: Returning cached result for job {cached_job['job_id']}")
                 return {
                     "status": "success",
                     "job_id": cached_job["job_id"],
@@ -697,7 +697,7 @@ async def analyze_endpoint(
             # Check if we can process immediately
             next_job = await processing_queue.process_next_job()
             if next_job and next_job.job_id == job_id:
-                print(f"🚀 Processing immediately: {file.filename}")
+                print(f"[INFO] Processing immediately: {file.filename}")
             else:
                 queue_status = processing_queue.get_queue_status(session_id)
                 return {
@@ -709,7 +709,7 @@ async def analyze_endpoint(
                 }
 
         except Exception as queue_error:
-            print(f"⚠️ Queue error: {queue_error}")
+            print(f"[WARN] Queue error: {queue_error}")
             return {
                 "status": "error",
                 "message": str(queue_error)
@@ -721,7 +721,7 @@ async def analyze_endpoint(
         with open(temp_filepath, "wb") as buffer:
             buffer.write(file_bytes)
 
-        print(f"🔬 Processing file with AI model: {file.filename}")
+        print(f"[INFO] Processing file with AI model: {file.filename}")
 
         # Process file through YOUR REAL AI PIPELINE
         start_time = datetime.now()
@@ -736,7 +736,7 @@ async def analyze_endpoint(
         processing_queue.update_job_progress(job_id, 75)
         
         processing_time = (datetime.now() - start_time).total_seconds()
-        print(f"✅ AI Analysis complete: {len(ai_results)} sequences processed ({processing_time:.2f}s)")
+        print(f"[OK] AI Analysis complete: {len(ai_results)} sequences processed ({processing_time:.2f}s)")
 
         # Convert AI results to frontend format
         result_data = convert_ai_results_to_frontend(ai_results, file.filename)
@@ -751,9 +751,9 @@ async def analyze_endpoint(
         if db:
             try:
                 stored_job_id = db.store_analysis(file_hash, file.filename, result_data, parsed_metadata, processing_time)
-                print(f"💾 Saved to database with job_id: {stored_job_id}")
+                print(f"[OK] Saved to database with job_id: {stored_job_id}")
             except Exception as db_error:
-                print(f"⚠️ Database save failed: {db_error}")
+                print(f"[WARN] Database save failed: {db_error}")
 
         # Mark queue job as completed
         processing_queue.complete_job(job_id, success=True)
@@ -771,7 +771,7 @@ async def analyze_endpoint(
     except HTTPException:
         raise
     except Exception as e:
-        print(f"❌ Error processing file: {str(e)}")
+        print(f"[ERROR] Error processing file: {str(e)}")
         import traceback
         traceback.print_exc()
         
@@ -817,15 +817,15 @@ def start_server(port: int = 8000, use_ngrok: bool = True, ngrok_token: str = No
             pass
 
         public_url = ngrok.connect(port).public_url
-        print(f"\n🚀 TAXAFORMER API STARTED (COMPLETE VERSION)")
-        print(f"📡 PUBLIC URL: {public_url}")
-        print(f"🤖 AI MODEL: BiodiversityPipeline (Fine-tuned)")
-        print(f"💾 DATABASE: {'Connected' if db else 'Disabled'}")
-        print(f"🔄 CACHING: {'Enabled' if db else 'Disabled'}")
-        print(f"🚦 QUEUE SYSTEM: Enabled")
-        print(f"📊 ANALYTICS: {'Enabled' if db else 'Disabled'}")
-        print(f"🔗 Test Analytics: {public_url}/api/simple-analytics/test")
-        print(f"📋 Queue Stats: {public_url}/queue/stats")
+        print(f"\nTAXAFORMER API STARTED (COMPLETE VERSION)")
+        print(f"PUBLIC URL: {public_url}")
+        print(f"AI MODEL: BiodiversityPipeline (Fine-tuned)")
+        print(f"DATABASE: {'Connected' if db else 'Disabled'}")
+        print(f"CACHING: {'Enabled' if db else 'Disabled'}")
+        print(f"QUEUE SYSTEM: Enabled")
+        print(f"ANALYTICS: {'Enabled' if db else 'Disabled'}")
+        print(f"Test Analytics: {public_url}/api/simple-analytics/test")
+        print(f"Queue Stats: {public_url}/queue/stats")
         print("="*60)
 
     uvicorn.run(app, host="0.0.0.0", port=port)

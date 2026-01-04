@@ -66,7 +66,7 @@ class ProcessingQueue:
         )
         
         self.queue.append(job)
-        print(f"📋 Job added to queue: {filename} (Position: {len(self.queue)})")
+        print(f"Job added to queue: {filename} (Position: {len(self.queue)})")
         
         return job
     
@@ -126,7 +126,7 @@ class ProcessingQueue:
                 # Check for timeout
                 if self.current_job.started_at and \
                    (datetime.now() - self.current_job.started_at).total_seconds() > self.job_timeout:
-                    print(f"⏰ Job timed out: {self.current_job.filename}")
+                    print(f"[TIMEOUT] Job timed out: {self.current_job.filename}")
                     self.current_job.status = JobStatus.FAILED
                     self.current_job = None
                 else:
@@ -139,7 +139,7 @@ class ProcessingQueue:
                 next_job.started_at = datetime.now()
                 self.current_job = next_job
                 
-                print(f"🔄 Processing job: {next_job.filename}")
+                print(f"Processing job: {next_job.filename}")
                 return next_job
             
             return None
@@ -156,7 +156,7 @@ class ProcessingQueue:
             self.current_job.completed_at = datetime.now()
             self.current_job.progress = 100 if success else 0
             
-            print(f"✅ Job completed: {self.current_job.filename} ({'success' if success else 'failed'})")
+            print(f"Job completed: {self.current_job.filename} ({'success' if success else 'failed'})")
             
             # Clear current job after a delay to allow status check
             asyncio.create_task(self.clear_completed_job_after_delay())

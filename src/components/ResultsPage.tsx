@@ -57,7 +57,7 @@ export default function ResultsPage({ isDarkMode, onNavigate }: ResultsPageProps
         }
 
         const analysisResults = JSON.parse(storedData);
-        console.log('📊 Loading analysis results for charts:', analysisResults);
+        console.log('Loading analysis results for charts:', analysisResults);
 
         // Convert analysis results to CSV format for charts
         const sequences = analysisResults.sequences || [];
@@ -70,7 +70,7 @@ export default function ResultsPage({ isDarkMode, onNavigate }: ResultsPageProps
           Nearest_Neighbor_Dist: 1 - (seq.confidence || 0), // Convert confidence to distance
         }));
 
-        console.log(`✅ Loaded ${parsedData.length} sequences for analysis charts`);
+        console.log(`Loaded ${parsedData.length} sequences for analysis charts`);
         setCsvData(parsedData);
         setLoading(false);
       } catch (err) {
@@ -196,7 +196,7 @@ export default function ResultsPage({ isDarkMode, onNavigate }: ResultsPageProps
   };
 
   const handleExportCSV = () => {
-    console.log('🔽 Export CSV function called!');
+    console.log('Export CSV function called!');
     console.log('Filtered data length:', filteredData.length);
     
     const headers = ['Sequence_ID', 'Predicted_Taxonomy', 'Novelty_Score', 'Status', 'Nearest_Neighbor_Taxonomy', 'Nearest_Neighbor_Dist'];

@@ -4,13 +4,11 @@ Simple test to check if analytics is working
 import requests
 import json
 
-# Test analytics endpoints
-API_URL = "http://localhost:8000"  # Change this to your backend URL
+API_URL = "http://localhost:8000"
 
 def test_analytics():
-    print("🧪 Testing Analytics System...")
+    print("Testing Analytics System...")
     
-    # Test 1: Create session
     print("\n1. Testing session creation...")
     session_data = {
         "deviceType": "desktop",
@@ -30,9 +28,8 @@ def test_analytics():
         if response.status_code == 200:
             result = response.json()
             session_id = result.get("sessionId")
-            print(f"✅ Session created: {session_id}")
+            print(f"Session created: {session_id}")
             
-            # Test 2: Track page view
             print("\n2. Testing page view tracking...")
             page_data = {
                 "sessionId": session_id,
@@ -45,7 +42,6 @@ def test_analytics():
             print(f"Status: {response.status_code}")
             print(f"Response: {response.json()}")
             
-            # Test 3: Track interaction
             print("\n3. Testing interaction tracking...")
             interaction_data = {
                 "sessionId": session_id,
@@ -61,17 +57,16 @@ def test_analytics():
             print(f"Status: {response.status_code}")
             print(f"Response: {response.json()}")
             
-            # Test 4: Get stats
             print("\n4. Testing stats retrieval...")
             response = requests.get(f"{API_URL}/api/analytics/stats")
             print(f"Status: {response.status_code}")
             print(f"Response: {response.json()}")
             
         else:
-            print(f"❌ Session creation failed: {response.text}")
+            print(f"Session creation failed: {response.text}")
             
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f"Error: {e}")
         print("Make sure your backend is running!")
 
 if __name__ == "__main__":
